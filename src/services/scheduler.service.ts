@@ -13,13 +13,13 @@ export function initializeScheduler(): void {
   }
 
   try {
-    // Hourly schedule: every hour at minute 0
-    const cronExpression = '0 * * * *';
+    // Hourly schedule: every hour from 9 AM to 11 PM (23:00)
+    const cronExpression = '0 9-23 * * *';
 
     logInfo('Initializing hourly menu scheduler', {
       timezone: config.scheduling.timezone,
       cronExpression,
-      frequency: 'Every hour',
+      frequency: 'Every hour from 9 AM to 11 PM',
     });
 
     // Schedule the hourly menu send
@@ -52,7 +52,7 @@ export function initializeScheduler(): void {
     task.start();
 
     logInfo('Hourly menu scheduler started successfully', {
-      schedule: 'Every hour at minute 0',
+      schedule: 'Every hour from 9:00 to 23:00 (Europe/Riga)',
     });
   } catch (error) {
     logError('Failed to initialize scheduler', error);
