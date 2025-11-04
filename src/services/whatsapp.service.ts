@@ -176,7 +176,7 @@ export class WhatsAppClient {
   async sendBloodPressureNotification(to: string, value: string): Promise<string> {
     // Add exclamation mark for critical high blood pressure
     const emoji = value === '>160' ? '❗️' : '✅';
-    const message = `${emoji} Артериальное давление (выбор родителя): ${value}`;
+    const message = `${emoji} Артериальное давление: ${value}`;
 
     return this.sendTextMessage(to, message);
   }
