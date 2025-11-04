@@ -4,42 +4,29 @@ import { whatsappClient } from './whatsapp.service';
 import { logInfo, logError } from '../utils/logger';
 
 /**
- * Parse time string (HH:MM) to cron expression
- * Example: "08:00" -> "0 8 * * *"
- */
-function timeToCronExpression(time: string): string {
-  const [hours, minutes] = time.split(':').map((n) => parseInt(n, 10));
-
-  if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-    throw new Error(`Invalid time format: ${time}. Expected HH:MM (24-hour format)`);
-  }
-
-  return `${minutes} ${hours} * * *`;
-}
-
-/**
- * Initialize daily menu scheduler if enabled
+ * Initialize menu scheduler if enabled
  */
 export function initializeScheduler(): void {
   if (!config.scheduling.enabled) {
-    logInfo('Daily scheduler is disabled');
+    logInfo('Scheduler is disabled');
     return;
   }
 
   try {
-    const cronExpression = timeToCronExpression(config.scheduling.dailySendTime);
+    // Hourly schedule: every hour at minute 0
+    const cronExpression = '0 * * * *';
 
-    logInfo('Initializing daily menu scheduler', {
-      time: config.scheduling.dailySendTime,
+    logInfo('Initializing hourly menu scheduler', {
       timezone: config.scheduling.timezone,
       cronExpression,
+      frequency: 'Every hour',
     });
 
-    // Schedule the daily menu send
+    // Schedule the hourly menu send
     const task = cron.schedule(
       cronExpression,
       async () => {
-        logInfo('Scheduled daily menu send triggered', {
+        logInfo('Scheduled hourly menu send triggered', {
           time: new Date().toISOString(),
         });
 
@@ -64,8 +51,8 @@ export function initializeScheduler(): void {
     // Start the cron job
     task.start();
 
-    logInfo('Daily menu scheduler started successfully', {
-      nextRun: 'Daily at ' + config.scheduling.dailySendTime,
+    logInfo('Hourly menu scheduler started successfully', {
+      schedule: 'Every hour at minute 0',
     });
   } catch (error) {
     logError('Failed to initialize scheduler', error);

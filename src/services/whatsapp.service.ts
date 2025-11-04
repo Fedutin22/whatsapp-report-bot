@@ -130,7 +130,7 @@ export class WhatsAppClient {
             text: '✅ Выберите диапазон артериального давления:',
           },
           action: {
-            button: '✅ Выбрать диапазон',
+            button: 'Выбрать диапазон',
             sections: [
               {
                 title: '✅ Артериальное давление',
@@ -174,7 +174,13 @@ export class WhatsAppClient {
    * Send blood pressure notification to kids
    */
   async sendBloodPressureNotification(to: string, value: string): Promise<string> {
-    const message = `✅ Артериальное давление (выбор родителя): ${value}`;
+    let message = `✅ Артериальное давление (выбор родителя): ${value}`;
+
+    // Add critical alert for high blood pressure
+    if (value === '>160') {
+      message = `❗️ КРИТИЧЕСКОЕ ДАВЛЕНИЕ ❗️\n\n⚠️ Артериальное давление (выбор родителя): ${value}\n\n❗️ ТРЕБУЕТСЯ СРОЧНОЕ ВНИМАНИЕ!`;
+    }
+
     return this.sendTextMessage(to, message);
   }
 
