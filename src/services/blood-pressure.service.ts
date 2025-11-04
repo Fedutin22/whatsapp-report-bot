@@ -117,6 +117,19 @@ export async function handleBloodPressureSelection(
     } catch (error) {
       logError('Failed to send error message to senior', error);
     }
+  } else {
+    // If at least one kid received the notification successfully, send subscription prompts
+    if (result.kid1Notification.success) {
+      whatsappClient.sendSubscriptionPrompt(config.phoneNumbers.kid1).catch((error) => {
+        logError('Failed to send subscription prompt to kid 1', error);
+      });
+    }
+
+    if (result.kid2Notification.success) {
+      whatsappClient.sendSubscriptionPrompt(config.phoneNumbers.kid2).catch((error) => {
+        logError('Failed to send subscription prompt to kid 2', error);
+      });
+    }
   }
 
   return result;

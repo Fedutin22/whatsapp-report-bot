@@ -4,6 +4,7 @@ import { logInfo, logError, logDebug } from '../utils/logger';
 import {
   TextMessage,
   InteractiveListMessage,
+  InteractiveButtonMessage,
   WhatsAppApiResponse,
   WhatsAppError as WhatsAppApiError,
 } from '../types/whatsapp.types';
@@ -127,13 +128,13 @@ export class WhatsAppClient {
         interactive: {
           type: 'list',
           body: {
-            text: '✅ Выберите диапазон артериального давления:',
+            text: '❗️ Выберите диапазон артериального давления:',
           },
           action: {
             button: 'Выбрать диапазон',
             sections: [
               {
-                title: '✅ Артериальное давление',
+                title: 'Артериальное давление',
                 rows: [
                   { id: 'bp_lt110', title: '<110' },
                   { id: 'bp_120', title: '120' },
@@ -195,6 +196,57 @@ export class WhatsAppClient {
   async sendErrorMessage(to: string): Promise<string> {
     const message = '❌ Извините, доставка не удалась. Попробуйте еще раз или обратитесь в поддержку.';
     return this.sendTextMessage(to, message);
+  }
+
+  /**
+   * Send subscription prompt to kids with interactive button
+   */
+  async sendSubscriptionPrompt(to: string): Promise<string> {
+    try {
+      const payload: InteractiveButtonMessage = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to,
+        type: 'interactive',
+        interactive: {
+          type: 'button',
+          body: {
+            text: '✅ Продолжить получать уведомления о давлении?',
+          },
+          action: {
+            buttons: [
+              {
+                type: 'reply',
+                reply: {
+                  id: 'subscribe_yes',
+                  title: '✅ Да, продолжить',
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      logInfo('Sending subscription prompt', { to });
+
+      const response = await this.client.post<WhatsAppApiResponse>('', payload);
+
+      const messageId = response.data.messages[0].id;
+      logInfo('Subscription prompt sent successfully', { to, messageId });
+
+      return messageId;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        const whatsappError = error.response.data.error;
+        throw new WhatsAppError(
+          whatsappError.message,
+          whatsappError.code,
+          whatsappError.type,
+          whatsappError.fbtrace_id
+        );
+      }
+      throw error;
+    }
   }
 }
 

@@ -8,11 +8,22 @@ export interface ParsedButtonSelection {
   messageId: string;
 }
 
+export interface ParsedSubscription {
+  from: string;
+  timestamp: string;
+  messageId: string;
+}
+
+export type ParsedWebhookMessage =
+  | { type: 'bp_selection'; data: ParsedButtonSelection }
+  | { type: 'subscription'; data: ParsedSubscription }
+  | null;
+
 /**
  * Parse webhook message to extract button/list selection
  * Returns null if message is not an interactive selection
  */
-export function parseWebhookPayload(message: any): ParsedButtonSelection | null {
+export function parseWebhookPayload(message: any): ParsedWebhookMessage {
   // Check if it's an interactive message
   if (message.type !== 'interactive') {
     return null;
@@ -47,6 +58,18 @@ export function parseWebhookPayload(message: any): ParsedButtonSelection | null 
     return null;
   }
 
+  // Check if it's a subscription response
+  if (buttonId === 'subscribe_yes') {
+    return {
+      type: 'subscription',
+      data: {
+        from: message.from,
+        timestamp: message.timestamp,
+        messageId: message.id,
+      },
+    };
+  }
+
   // Map button ID to blood pressure value
   const selectedValue = BLOOD_PRESSURE_BUTTON_MAP[buttonId];
 
@@ -56,9 +79,12 @@ export function parseWebhookPayload(message: any): ParsedButtonSelection | null 
   }
 
   return {
-    from: message.from,
-    selectedValue,
-    timestamp: message.timestamp,
-    messageId: message.id,
+    type: 'bp_selection',
+    data: {
+      from: message.from,
+      selectedValue,
+      timestamp: message.timestamp,
+      messageId: message.id,
+    },
   };
 }

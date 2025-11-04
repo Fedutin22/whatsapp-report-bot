@@ -35,6 +35,25 @@ export interface InteractiveListMessage extends WhatsAppMessage {
   };
 }
 
+export interface InteractiveButtonMessage extends WhatsAppMessage {
+  type: 'interactive';
+  interactive: {
+    type: 'button';
+    body: {
+      text: string;
+    };
+    action: {
+      buttons: Array<{
+        type: 'reply';
+        reply: {
+          id: string;
+          title: string;
+        };
+      }>;
+    };
+  };
+}
+
 export interface WhatsAppApiResponse {
   messaging_product: string;
   contacts: Array<{

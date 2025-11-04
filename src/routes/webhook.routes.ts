@@ -68,14 +68,29 @@ router.post('/webhook', async (req: Request, res: Response) => {
             // Check if it's an interactive message (button/list selection)
             const parsed = parseWebhookPayload(message);
 
-            if (parsed) {
-              logInfo('Parsed button selection', {
-                from: parsed.from,
-                value: parsed.selectedValue,
+            if (parsed?.type === 'bp_selection') {
+              logInfo('Parsed BP selection', {
+                from: parsed.data.from,
+                value: parsed.data.selectedValue,
               });
 
               // Handle the blood pressure selection
-              await handleBloodPressureSelection(parsed.from, parsed.selectedValue);
+              await handleBloodPressureSelection(parsed.data.from, parsed.data.selectedValue);
+            } else if (parsed?.type === 'subscription') {
+              logInfo('Parsed subscription confirmation', {
+                from: parsed.data.from,
+              });
+
+              // Just log it - the button press itself renews the 24h window
+              // Send confirmation to kid
+              try {
+                await whatsappClient.sendTextMessage(
+                  parsed.data.from,
+                  '✅ Спасибо! Вы продолжите получать уведомления.'
+                );
+              } catch (error) {
+                logError('Failed to send subscription confirmation', error);
+              }
             }
             // If it's a text message from the senior, auto-reply with menu
             else if (message.type === 'text' && message.from === config.phoneNumbers.senior) {
