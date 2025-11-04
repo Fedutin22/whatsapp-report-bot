@@ -49,3 +49,11 @@ build/
 tmp/
 temp/
 *.tmp
+
+# Data files
+data/
+*.csv
+*.db
+
+# Claude internal
+.claude/
