@@ -174,12 +174,9 @@ export class WhatsAppClient {
    * Send blood pressure notification to kids
    */
   async sendBloodPressureNotification(to: string, value: string): Promise<string> {
-    let message = `✅ Артериальное давление (выбор родителя): ${value}`;
-
-    // Add critical alert for high blood pressure
-    if (value === '>160') {
-      message = `❗️ КРИТИЧЕСКОЕ ДАВЛЕНИЕ ❗️\n\n⚠️ Артериальное давление (выбор родителя): ${value}\n\n❗️ ТРЕБУЕТСЯ СРОЧНОЕ ВНИМАНИЕ!`;
-    }
+    // Add exclamation mark for critical high blood pressure
+    const emoji = value === '>160' ? '❗️' : '✅';
+    const message = `${emoji} Артериальное давление (выбор родителя): ${value}`;
 
     return this.sendTextMessage(to, message);
   }
