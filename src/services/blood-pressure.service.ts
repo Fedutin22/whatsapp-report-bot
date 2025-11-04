@@ -12,13 +12,13 @@ export interface DeliveryResult {
 
 export interface BloodPressureHandlerResult {
   seniorConfirmation: DeliveryResult;
-  caregiver1Notification: DeliveryResult;
-  caregiver2Notification: DeliveryResult;
+  kid1Notification: DeliveryResult;
+  kid2Notification: DeliveryResult;
 }
 
 /**
  * Handle blood pressure selection from senior
- * Sends confirmation to senior and notifications to both caregivers
+ * Sends confirmation to senior and notifications to both kids
  */
 export async function handleBloodPressureSelection(
   from: string,
@@ -37,16 +37,16 @@ export async function handleBloodPressureSelection(
 
   const result: BloodPressureHandlerResult = {
     seniorConfirmation: { success: false },
-    caregiver1Notification: { success: false },
-    caregiver2Notification: { success: false },
+    kid1Notification: { success: false },
+    kid2Notification: { success: false },
   };
 
   // Send messages to all recipients in parallel using Promise.allSettled
   // This ensures one failure doesn't block others
-  const [seniorResult, caregiver1Result, caregiver2Result] = await Promise.allSettled([
+  const [seniorResult, kid1Result, kid2Result] = await Promise.allSettled([
     whatsappClient.sendConfirmation(from, value),
-    whatsappClient.sendBloodPressureNotification(config.phoneNumbers.caregiver1, value),
-    whatsappClient.sendBloodPressureNotification(config.phoneNumbers.caregiver2, value),
+    whatsappClient.sendBloodPressureNotification(config.phoneNumbers.kid1, value),
+    whatsappClient.sendBloodPressureNotification(config.phoneNumbers.kid2, value),
   ]);
 
   // Process senior confirmation result
@@ -64,34 +64,34 @@ export async function handleBloodPressureSelection(
     logError('Failed to send senior confirmation', seniorResult.reason);
   }
 
-  // Process caregiver 1 result
-  if (caregiver1Result.status === 'fulfilled') {
-    result.caregiver1Notification = {
+  // Process kid 1 result
+  if (kid1Result.status === 'fulfilled') {
+    result.kid1Notification = {
       success: true,
-      messageId: caregiver1Result.value,
+      messageId: kid1Result.value,
     };
-    logInfo('Caregiver 1 notification sent', { messageId: caregiver1Result.value });
+    logInfo('Kid 1 notification sent', { messageId: kid1Result.value });
   } else {
-    result.caregiver1Notification = {
+    result.kid1Notification = {
       success: false,
-      error: caregiver1Result.reason?.message || 'Unknown error',
+      error: kid1Result.reason?.message || 'Unknown error',
     };
-    logError('Failed to send caregiver 1 notification', caregiver1Result.reason);
+    logError('Failed to send kid 1 notification', kid1Result.reason);
   }
 
-  // Process caregiver 2 result
-  if (caregiver2Result.status === 'fulfilled') {
-    result.caregiver2Notification = {
+  // Process kid 2 result
+  if (kid2Result.status === 'fulfilled') {
+    result.kid2Notification = {
       success: true,
-      messageId: caregiver2Result.value,
+      messageId: kid2Result.value,
     };
-    logInfo('Caregiver 2 notification sent', { messageId: caregiver2Result.value });
+    logInfo('Kid 2 notification sent', { messageId: kid2Result.value });
   } else {
-    result.caregiver2Notification = {
+    result.kid2Notification = {
       success: false,
-      error: caregiver2Result.reason?.message || 'Unknown error',
+      error: kid2Result.reason?.message || 'Unknown error',
     };
-    logError('Failed to send caregiver 2 notification', caregiver2Result.reason);
+    logError('Failed to send kid 2 notification', kid2Result.reason);
   }
 
   // Log the event to CSV
@@ -99,19 +99,19 @@ export async function handleBloodPressureSelection(
     timestamp: new Date().toISOString(),
     seniorNumber: from,
     value,
-    caregiver1Status: result.caregiver1Notification.success ? 'sent' : 'failed',
-    caregiver2Status: result.caregiver2Notification.success ? 'sent' : 'failed',
-    caregiver1MessageId: result.caregiver1Notification.messageId,
-    caregiver2MessageId: result.caregiver2Notification.messageId,
+    kid1Status: result.kid1Notification.success ? 'sent' : 'failed',
+    kid2Status: result.kid2Notification.success ? 'sent' : 'failed',
+    kid1MessageId: result.kid1Notification.messageId,
+    kid2MessageId: result.kid2Notification.messageId,
     errors: {
-      caregiver1: result.caregiver1Notification.error,
-      caregiver2: result.caregiver2Notification.error,
+      kid1: result.kid1Notification.error,
+      kid2: result.kid2Notification.error,
     },
   });
 
-  // If both caregivers failed, send error message to senior
-  if (!result.caregiver1Notification.success && !result.caregiver2Notification.success) {
-    logError('Both caregivers failed, sending error message to senior');
+  // If both kids failed, send error message to senior
+  if (!result.kid1Notification.success && !result.kid2Notification.success) {
+    logError('Both kids failed, sending error message to senior');
     try {
       await whatsappClient.sendErrorMessage(from);
     } catch (error) {

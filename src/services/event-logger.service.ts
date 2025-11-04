@@ -8,13 +8,13 @@ export interface EventLogEntry {
   timestamp: string;
   seniorNumber: string;
   value: BloodPressureValue;
-  caregiver1Status: 'sent' | 'failed';
-  caregiver2Status: 'sent' | 'failed';
-  caregiver1MessageId?: string;
-  caregiver2MessageId?: string;
+  kid1Status: 'sent' | 'failed';
+  kid2Status: 'sent' | 'failed';
+  kid1MessageId?: string;
+  kid2MessageId?: string;
   errors?: {
-    caregiver1?: string;
-    caregiver2?: string;
+    kid1?: string;
+    kid2?: string;
   };
 }
 
@@ -35,10 +35,10 @@ const csvWriter = createObjectCsvWriter({
     { id: 'timestamp', title: 'Timestamp' },
     { id: 'seniorNumber', title: 'Senior Number' },
     { id: 'value', title: 'Blood Pressure Value' },
-    { id: 'caregiver1Status', title: 'Caregiver 1 Status' },
-    { id: 'caregiver2Status', title: 'Caregiver 2 Status' },
-    { id: 'caregiver1MessageId', title: 'Caregiver 1 Message ID' },
-    { id: 'caregiver2MessageId', title: 'Caregiver 2 Message ID' },
+    { id: 'kid1Status', title: 'Kid 1 Status' },
+    { id: 'kid2Status', title: 'Kid 2 Status' },
+    { id: 'kid1MessageId', title: 'Kid 1 Message ID' },
+    { id: 'kid2MessageId', title: 'Kid 2 Message ID' },
     { id: 'errorDetails', title: 'Error Details' },
   ],
   append: true, // Append to existing file
@@ -67,14 +67,14 @@ export async function logSelectionEvent(entry: EventLogEntry): Promise<void> {
       timestamp: entry.timestamp,
       seniorNumber: entry.seniorNumber,
       value: entry.value,
-      caregiver1Status: entry.caregiver1Status,
-      caregiver2Status: entry.caregiver2Status,
-      caregiver1MessageId: entry.caregiver1MessageId || '',
-      caregiver2MessageId: entry.caregiver2MessageId || '',
+      kid1Status: entry.kid1Status,
+      kid2Status: entry.kid2Status,
+      kid1MessageId: entry.kid1MessageId || '',
+      kid2MessageId: entry.kid2MessageId || '',
       errorDetails: entry.errors
         ? JSON.stringify({
-            cg1: entry.errors.caregiver1,
-            cg2: entry.errors.caregiver2,
+            kid1: entry.errors.kid1,
+            kid2: entry.errors.kid2,
           })
         : '',
     };
@@ -83,8 +83,8 @@ export async function logSelectionEvent(entry: EventLogEntry): Promise<void> {
 
     logInfo('Event logged to CSV', {
       value: entry.value,
-      cg1Status: entry.caregiver1Status,
-      cg2Status: entry.caregiver2Status,
+      kid1Status: entry.kid1Status,
+      kid2Status: entry.kid2Status,
     });
   } catch (error) {
     logError('Failed to log event to CSV', error);
@@ -120,10 +120,10 @@ export async function getRecentEvents(limit: number = 100): Promise<any[]> {
         timestamp: parts[0],
         seniorNumber: parts[1],
         value: parts[2],
-        caregiver1Status: parts[3],
-        caregiver2Status: parts[4],
-        caregiver1MessageId: parts[5],
-        caregiver2MessageId: parts[6],
+        kid1Status: parts[3],
+        kid2Status: parts[4],
+        kid1MessageId: parts[5],
+        kid2MessageId: parts[6],
         errorDetails: parts[7],
       };
     });
@@ -149,7 +149,7 @@ export async function getStatistics(): Promise<{
 
     const totalEvents = events.length;
     const successfulDeliveries = events.filter(
-      (e) => e.caregiver1Status === 'sent' && e.caregiver2Status === 'sent'
+      (e) => e.kid1Status === 'sent' && e.kid2Status === 'sent'
     ).length;
     const failedDeliveries = totalEvents - successfulDeliveries;
     const successRate = totalEvents > 0 ? (successfulDeliveries / totalEvents) * 100 : 0;

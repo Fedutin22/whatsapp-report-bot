@@ -35,8 +35,8 @@ const requiredEnvVars = [
   'PHONE_NUMBER_ID',
   'VERIFY_TOKEN',
   'SENIOR_NUMBER',
-  'CAREGIVER1',
-  'CAREGIVER2',
+  'KID1',
+  'KID2',
   'SEND_MENU_BEARER',
 ];
 
@@ -67,8 +67,8 @@ export const config = {
   // Phone Numbers
   phoneNumbers: {
     senior: validatePhoneNumber(process.env.SENIOR_NUMBER!, 'SENIOR_NUMBER'),
-    caregiver1: validatePhoneNumber(process.env.CAREGIVER1!, 'CAREGIVER1'),
-    caregiver2: validatePhoneNumber(process.env.CAREGIVER2!, 'CAREGIVER2'),
+    kid1: validatePhoneNumber(process.env.KID1!, 'KID1'),
+    kid2: validatePhoneNumber(process.env.KID2!, 'KID2'),
   },
 
   // Security

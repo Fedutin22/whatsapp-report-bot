@@ -127,13 +127,13 @@ export class WhatsAppClient {
         interactive: {
           type: 'list',
           body: {
-            text: 'Choose your blood pressure range:',
+            text: '✅ Выберите диапазон артериального давления:',
           },
           action: {
-            button: 'Select Range',
+            button: '✅ Выбрать диапазон',
             sections: [
               {
-                title: 'Blood Pressure',
+                title: '✅ Артериальное давление',
                 rows: [
                   { id: 'bp_lt110', title: '<110' },
                   { id: 'bp_120', title: '120' },
@@ -171,10 +171,10 @@ export class WhatsAppClient {
   }
 
   /**
-   * Send blood pressure notification to caregivers
+   * Send blood pressure notification to kids
    */
   async sendBloodPressureNotification(to: string, value: string): Promise<string> {
-    const message = `Blood pressure (senior selection): ${value}`;
+    const message = `✅ Артериальное давление (выбор родителя): ${value}`;
     return this.sendTextMessage(to, message);
   }
 
@@ -182,7 +182,7 @@ export class WhatsAppClient {
    * Send confirmation message to senior
    */
   async sendConfirmation(to: string, value: string): Promise<string> {
-    const message = `Received: ${value}. Sent to caregivers.`;
+    const message = `✅ Получено: ${value}. Отправлено детям.`;
     return this.sendTextMessage(to, message);
   }
 
@@ -190,7 +190,7 @@ export class WhatsAppClient {
    * Send error message to user
    */
   async sendErrorMessage(to: string): Promise<string> {
-    const message = 'Sorry, delivery failed. Please try again or contact support.';
+    const message = '❌ Извините, доставка не удалась. Попробуйте еще раз или обратитесь в поддержку.';
     return this.sendTextMessage(to, message);
   }
 }
