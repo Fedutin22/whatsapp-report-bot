@@ -85,15 +85,14 @@ VERIFY_TOKEN=your-webhook-verify-token-here
 
 # Phone Numbers (E.164 format, digits only, no '+')
 SENIOR_NUMBER=3712XXXXXXX
-CAREGIVER1=3712YYYYYYY
-CAREGIVER2=3712ZZZZZZZ
+KID1=3712YYYYYYY
+KID2=3712ZZZZZZZ
 
 # Security (Generate strong random string)
 SEND_MENU_BEARER=generate-a-long-random-string-min-32-chars
 
-# Optional: Enable daily scheduled menu
+# Optional: Enable hourly scheduled menu (sends menu every hour)
 ENABLE_DAILY_SCHEDULE=false
-DAILY_SEND_TIME=08:00
 TIMEZONE=Europe/Riga
 ```
 
