@@ -3,6 +3,10 @@ import { config } from '../config/env';
 import { logInfo, logError, logWarn } from '../utils/logger';
 import { BloodPressureValue } from '../types/whatsapp.types';
 import { logSelectionEvent } from './event-logger.service';
+import {
+  shouldSendSubscriptionPrompt,
+  markSubscriptionPromptSent,
+} from './subscription-tracker.service';
 
 export interface DeliveryResult {
   success: boolean;
@@ -118,17 +122,29 @@ export async function handleBloodPressureSelection(
       logError('Failed to send error message to senior', error);
     }
   } else {
-    // If at least one kid received the notification successfully, send subscription prompts
-    if (result.kid1Notification.success) {
-      whatsappClient.sendSubscriptionPrompt(config.phoneNumbers.kid1).catch((error) => {
-        logError('Failed to send subscription prompt to kid 1', error);
-      });
+    // If at least one kid received the notification successfully,
+    // send subscription prompts (but only if enough time has passed - max twice per day)
+
+    if (result.kid1Notification.success && shouldSendSubscriptionPrompt(config.phoneNumbers.kid1)) {
+      whatsappClient
+        .sendSubscriptionPrompt(config.phoneNumbers.kid1)
+        .then(() => {
+          markSubscriptionPromptSent(config.phoneNumbers.kid1);
+        })
+        .catch((error) => {
+          logError('Failed to send subscription prompt to kid 1', error);
+        });
     }
 
-    if (result.kid2Notification.success) {
-      whatsappClient.sendSubscriptionPrompt(config.phoneNumbers.kid2).catch((error) => {
-        logError('Failed to send subscription prompt to kid 2', error);
-      });
+    if (result.kid2Notification.success && shouldSendSubscriptionPrompt(config.phoneNumbers.kid2)) {
+      whatsappClient
+        .sendSubscriptionPrompt(config.phoneNumbers.kid2)
+        .then(() => {
+          markSubscriptionPromptSent(config.phoneNumbers.kid2);
+        })
+        .catch((error) => {
+          logError('Failed to send subscription prompt to kid 2', error);
+        });
     }
   }
 
