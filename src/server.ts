@@ -4,6 +4,7 @@ import { config } from './config/env';
 import { logInfo, logError } from './utils/logger';
 import menuRoutes from './routes/menu.routes';
 import webhookRoutes from './routes/webhook.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 import { initializeScheduler } from './services/scheduler.service';
 
 // Create Express app
@@ -39,6 +40,7 @@ app.get('/health', (_req: Request, res: Response) => {
 // Routes
 app.use('/', menuRoutes);
 app.use('/', webhookRoutes);
+app.use('/', dashboardRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
