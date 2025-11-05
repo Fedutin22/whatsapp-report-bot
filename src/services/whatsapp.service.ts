@@ -134,7 +134,7 @@ export class WhatsAppClient {
             button: 'Выбрать диапазон',
             sections: [
               {
-                title: 'Артериальное давление',
+                title: 'Низкое - Нормальное',
                 rows: [
                   { id: 'bp_lt110', title: '<110' },
                   { id: 'bp_115', title: '115' },
@@ -142,6 +142,11 @@ export class WhatsAppClient {
                   { id: 'bp_125', title: '125' },
                   { id: 'bp_130', title: '130' },
                   { id: 'bp_135', title: '135' },
+                ],
+              },
+              {
+                title: 'Повышенное - Высокое',
+                rows: [
                   { id: 'bp_140', title: '140' },
                   { id: 'bp_145', title: '145' },
                   { id: 'bp_150', title: '150' },
