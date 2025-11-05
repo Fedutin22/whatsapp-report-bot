@@ -277,6 +277,14 @@ router.get('/dashboard', (_req: Request, res: Response) => {
                 <div class="stat-value" id="totalReports">-</div>
             </div>
             <div class="stat-card">
+                <div class="stat-label">Average BP</div>
+                <div class="stat-value" id="averageBP">-<span class="stat-unit">mmHg</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">High BP Alerts</div>
+                <div class="stat-value" id="highBPCount">-<span class="stat-unit">times</span></div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-label">Success Rate</div>
                 <div class="stat-value" id="successRate">-<span class="stat-unit">%</span></div>
             </div>
@@ -345,6 +353,8 @@ router.get('/dashboard', (_req: Request, res: Response) => {
 
                 // Update statistics
                 document.getElementById('totalReports').textContent = stats.totalEvents;
+                document.getElementById('averageBP').textContent = stats.averageBP || '-';
+                document.getElementById('highBPCount').textContent = stats.highBPCount || '0';
                 document.getElementById('successRate').textContent = stats.successRate;
 
                 // Update last report time

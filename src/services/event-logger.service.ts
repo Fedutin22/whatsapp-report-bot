@@ -143,6 +143,8 @@ export async function getStatistics(): Promise<{
   successfulDeliveries: number;
   failedDeliveries: number;
   successRate: number;
+  averageBP: number;
+  highBPCount: number;
 }> {
   try {
     const events = await getRecentEvents(1000); // Last 1000 events
@@ -154,11 +156,39 @@ export async function getStatistics(): Promise<{
     const failedDeliveries = totalEvents - successfulDeliveries;
     const successRate = totalEvents > 0 ? (successfulDeliveries / totalEvents) * 100 : 0;
 
+    // Calculate average BP and high BP count
+    let totalBP = 0;
+    let countableEvents = 0;
+    let highBPCount = 0;
+
+    events.forEach((e) => {
+      const value = e.value;
+      if (value === '<110') {
+        totalBP += 105; // Use 105 as representative value
+        countableEvents++;
+      } else if (value === '>160') {
+        totalBP += 165; // Use 165 as representative value
+        countableEvents++;
+        highBPCount++;
+      } else {
+        // It's a numeric value like '120', '130', etc.
+        const numValue = parseInt(value, 10);
+        if (!isNaN(numValue)) {
+          totalBP += numValue;
+          countableEvents++;
+        }
+      }
+    });
+
+    const averageBP = countableEvents > 0 ? Math.round(totalBP / countableEvents) : 0;
+
     return {
       totalEvents,
       successfulDeliveries,
       failedDeliveries,
       successRate: Math.round(successRate * 100) / 100,
+      averageBP,
+      highBPCount,
     };
   } catch (error) {
     logError('Failed to calculate statistics', error);
@@ -167,6 +197,8 @@ export async function getStatistics(): Promise<{
       successfulDeliveries: 0,
       failedDeliveries: 0,
       successRate: 0,
+      averageBP: 0,
+      highBPCount: 0,
     };
   }
 }
