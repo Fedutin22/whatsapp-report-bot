@@ -142,8 +142,8 @@ export async function getStatisticsFromDB(): Promise<{
     if (bpResult && bpResult.rows.length > 0) {
       bpResult.rows.forEach((row) => {
         const value = row.bp_value;
-        if (value === '<110') {
-          totalBP += 105;
+        if (value === '<115' || value === '<110') {
+          totalBP += 110;
           countableEvents++;
         } else if (value === '>160') {
           totalBP += 165;

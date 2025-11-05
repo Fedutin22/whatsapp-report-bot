@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { config } from '../config/env';
 import { whatsappClient } from './whatsapp.service';
+import { sendDailyReport } from './daily-report.service';
 import { logInfo, logError } from '../utils/logger';
 
 /**
@@ -13,20 +14,20 @@ export function initializeScheduler(): void {
   }
 
   try {
-    // TESTING: Every minute schedule
-    const cronExpression = '* * * * *';
+    // Production: Hourly schedule from 9 AM to 11 PM
+    const cronExpression = '0 9-23 * * *';
 
-    logInfo('Initializing every-minute menu scheduler (TESTING MODE)', {
+    logInfo('Initializing hourly menu scheduler', {
       timezone: config.scheduling.timezone,
       cronExpression,
-      frequency: 'Every minute (for testing)',
+      frequency: 'Every hour from 9 AM to 11 PM',
     });
 
-    // Schedule the every-minute menu send
-    const task = cron.schedule(
+    // Schedule the hourly menu send
+    const menuTask = cron.schedule(
       cronExpression,
       async () => {
-        logInfo('Scheduled every-minute menu send triggered', {
+        logInfo('Scheduled hourly menu send triggered', {
           time: new Date().toISOString(),
         });
 
@@ -48,11 +49,48 @@ export function initializeScheduler(): void {
       }
     );
 
-    // Start the cron job
-    task.start();
+    // Start the menu cron job
+    menuTask.start();
 
-    logInfo('Every-minute menu scheduler started successfully (TESTING MODE)', {
-      schedule: 'Every minute',
+    logInfo('Hourly menu scheduler started successfully', {
+      schedule: 'Every hour from 9:00 to 23:00',
+      timezone: config.scheduling.timezone,
+    });
+
+    // Daily report schedule: 20:00 (8 PM) every day
+    const dailyReportExpression = '0 20 * * *';
+
+    logInfo('Initializing daily report scheduler', {
+      timezone: config.scheduling.timezone,
+      cronExpression: dailyReportExpression,
+      frequency: 'Daily at 20:00 (8 PM)',
+    });
+
+    const reportTask = cron.schedule(
+      dailyReportExpression,
+      async () => {
+        logInfo('Scheduled daily report triggered', {
+          time: new Date().toISOString(),
+        });
+
+        try {
+          await sendDailyReport();
+          logInfo('Daily report sent successfully');
+        } catch (error) {
+          logError('Failed to send daily report', error);
+        }
+      },
+      {
+        timezone: config.scheduling.timezone,
+      }
+    );
+
+    // Start the daily report cron job
+    reportTask.start();
+
+    logInfo('Daily report scheduler started successfully', {
+      schedule: 'Daily at 20:00 (8 PM)',
+      timezone: config.scheduling.timezone,
     });
   } catch (error) {
     logError('Failed to initialize scheduler', error);
