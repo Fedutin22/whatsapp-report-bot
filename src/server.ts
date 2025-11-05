@@ -6,6 +6,7 @@ import menuRoutes from './routes/menu.routes';
 import webhookRoutes from './routes/webhook.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import { initializeScheduler } from './services/scheduler.service';
+import { initializeDatabase } from './database/db.service';
 
 // Create Express app
 const app = express();
@@ -59,6 +60,9 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     message: config.nodeEnv === 'development' ? err.message : 'Something went wrong',
   });
 });
+
+// Initialize database
+initializeDatabase();
 
 // Start server
 const server = app.listen(config.port, () => {

@@ -3,6 +3,12 @@ import path from 'path';
 import fs from 'fs';
 import { logInfo, logError } from '../utils/logger';
 import { BloodPressureValue } from '../types/whatsapp.types';
+import {
+  logEventToDatabase,
+  getRecentEventsFromDB,
+  getStatisticsFromDB,
+} from './event-logger-db.service';
+import { isDatabaseAvailable } from '../database/db.service';
 
 export interface EventLogEntry {
   timestamp: string;
@@ -59,9 +65,24 @@ function ensureCsvHeader(): void {
 ensureCsvHeader();
 
 /**
- * Log a blood pressure selection event to CSV
+ * Log a blood pressure selection event to CSV and Database
  */
 export async function logSelectionEvent(entry: EventLogEntry): Promise<void> {
+  // Log to database first (if available)
+  if (isDatabaseAvailable()) {
+    await logEventToDatabase({
+      timestamp: new Date(entry.timestamp),
+      seniorNumber: entry.seniorNumber,
+      bpValue: entry.value,
+      kid1Status: entry.kid1Status,
+      kid2Status: entry.kid2Status,
+      kid1MessageId: entry.kid1MessageId,
+      kid2MessageId: entry.kid2MessageId,
+      errorDetails: entry.errors,
+    });
+  }
+
+  // Also log to CSV as backup
   try {
     const record = {
       timestamp: entry.timestamp,
@@ -81,7 +102,7 @@ export async function logSelectionEvent(entry: EventLogEntry): Promise<void> {
 
     await csvWriter.writeRecords([record]);
 
-    logInfo('Event logged to CSV', {
+    logInfo('Event logged to CSV and database', {
       value: entry.value,
       kid1Status: entry.kid1Status,
       kid2Status: entry.kid2Status,
@@ -93,9 +114,18 @@ export async function logSelectionEvent(entry: EventLogEntry): Promise<void> {
 }
 
 /**
- * Get recent events from CSV (for future dashboard/monitoring)
+ * Get recent events from Database (falls back to CSV if DB unavailable)
  */
 export async function getRecentEvents(limit: number = 100): Promise<any[]> {
+  // Try database first
+  if (isDatabaseAvailable()) {
+    const dbEvents = await getRecentEventsFromDB(limit);
+    if (dbEvents.length > 0) {
+      return dbEvents;
+    }
+  }
+
+  // Fallback to CSV
   try {
     if (!fs.existsSync(csvFilePath)) {
       return [];
@@ -136,7 +166,7 @@ export async function getRecentEvents(limit: number = 100): Promise<any[]> {
 }
 
 /**
- * Get statistics from logged events
+ * Get statistics from logged events (Database or CSV fallback)
  */
 export async function getStatistics(): Promise<{
   totalEvents: number;
@@ -146,6 +176,15 @@ export async function getStatistics(): Promise<{
   averageBP: number;
   highBPCount: number;
 }> {
+  // Try database first
+  if (isDatabaseAvailable()) {
+    const dbStats = await getStatisticsFromDB();
+    if (dbStats) {
+      return dbStats;
+    }
+  }
+
+  // Fallback to CSV
   try {
     const events = await getRecentEvents(1000); // Last 1000 events
 
