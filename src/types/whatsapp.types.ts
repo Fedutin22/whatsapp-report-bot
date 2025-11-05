@@ -129,7 +129,7 @@ export interface WebhookPayload {
 }
 
 // Blood pressure value type
-export type BloodPressureValue = '<110' | '115' | '120' | '125' | '130' | '135' | '140' | '145' | '150' | '155' | '>160';
+export type BloodPressureValue = '<110' | '115' | '120' | '125' | '130' | '135' | '140' | '145' | '150' | '>160';
 
 export const BLOOD_PRESSURE_BUTTON_MAP: Record<string, BloodPressureValue> = {
   bp_lt110: '<110',
@@ -141,6 +141,5 @@ export const BLOOD_PRESSURE_BUTTON_MAP: Record<string, BloodPressureValue> = {
   bp_140: '140',
   bp_145: '145',
   bp_150: '150',
-  bp_155: '155',
   bp_gt160: '>160',
 };

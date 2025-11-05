@@ -141,16 +141,15 @@ export class WhatsAppClient {
                   { id: 'bp_120', title: '120' },
                   { id: 'bp_125', title: '125' },
                   { id: 'bp_130', title: '130' },
-                  { id: 'bp_135', title: '135' },
                 ],
               },
               {
                 title: 'Pov/Vis',
                 rows: [
+                  { id: 'bp_135', title: '135' },
                   { id: 'bp_140', title: '140' },
                   { id: 'bp_145', title: '145' },
                   { id: 'bp_150', title: '150' },
-                  { id: 'bp_155', title: '155' },
                   { id: 'bp_gt160', title: '>160' },
                 ],
               },
