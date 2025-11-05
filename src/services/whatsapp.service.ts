@@ -134,7 +134,7 @@ export class WhatsAppClient {
             button: 'Выбрать диапазон',
             sections: [
               {
-                title: 'Низкое - Нормальное',
+                title: 'Niz/Norm',
                 rows: [
                   { id: 'bp_lt110', title: '<110' },
                   { id: 'bp_115', title: '115' },
@@ -145,7 +145,7 @@ export class WhatsAppClient {
                 ],
               },
               {
-                title: 'Повышенное - Высокое',
+                title: 'Pov/Vis',
                 rows: [
                   { id: 'bp_140', title: '140' },
                   { id: 'bp_145', title: '145' },
