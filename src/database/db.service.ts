@@ -1,13 +1,14 @@
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { logInfo, logError } from '../utils/logger';
+import { runMigrations } from './auto-migrate';
 
 // Database connection pool
 let pool: Pool | null = null;
 
 /**
- * Initialize database connection pool
+ * Initialize database connection pool and run migrations
  */
-export function initializeDatabase(databaseUrl?: string): void {
+export async function initializeDatabase(databaseUrl?: string): Promise<void> {
   if (pool) {
     return; // Already initialized
   }
@@ -20,6 +21,13 @@ export function initializeDatabase(databaseUrl?: string): void {
   }
 
   try {
+    // Run migrations first
+    const migrationSuccess = await runMigrations(connectionString);
+    if (!migrationSuccess) {
+      logError('Migrations failed, but continuing with app startup');
+    }
+
+    // Create connection pool
     pool = new Pool({
       connectionString,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,

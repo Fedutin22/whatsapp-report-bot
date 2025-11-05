@@ -61,8 +61,10 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// Initialize database
-initializeDatabase();
+// Initialize database (async, but don't wait for it to start server)
+initializeDatabase().catch((error) => {
+  logError('Database initialization failed', error);
+});
 
 // Start server
 const server = app.listen(config.port, () => {
