@@ -5,6 +5,7 @@ import { logInfo, logError } from './utils/logger';
 import menuRoutes from './routes/menu.routes';
 import webhookRoutes from './routes/webhook.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import adminRoutes from './routes/admin.routes';
 import { initializeScheduler } from './services/scheduler.service';
 import { initializeDatabase } from './database/db.service';
 
@@ -42,6 +43,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/', menuRoutes);
 app.use('/', webhookRoutes);
 app.use('/', dashboardRoutes);
+app.use('/', adminRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
