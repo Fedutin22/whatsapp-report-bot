@@ -313,6 +313,29 @@ router.get('/dashboard', (_req: Request, res: Response) => {
             </button>
         </div>
 
+        <div class="reports-section" style="margin-bottom: 30px;">
+            <div class="section-title">
+                📈 Daily Average Blood Pressure
+            </div>
+            <div class="table-container">
+                <div class="loading" id="loadingDailyAverages">
+                    <div class="spinner"></div>
+                    <p>Loading daily averages...</p>
+                </div>
+                <table id="dailyAveragesTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Average BP (mmHg)</th>
+                            <th>Measurements</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyAveragesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="reports-section">
             <div class="section-title">
                 📋 Recent Blood Pressure Reports
@@ -346,9 +369,10 @@ router.get('/dashboard', (_req: Request, res: Response) => {
 
         async function loadDashboardData() {
             try {
-                const [events, stats] = await Promise.all([
+                const [events, stats, dailyAverages] = await Promise.all([
                     fetch('/api/events').then(r => r.json()),
-                    fetch('/api/statistics').then(r => r.json())
+                    fetch('/api/statistics').then(r => r.json()),
+                    fetch('/api/daily-averages').then(r => r.json())
                 ]);
 
                 // Update statistics
@@ -357,9 +381,9 @@ router.get('/dashboard', (_req: Request, res: Response) => {
                 document.getElementById('highBPCount').textContent = stats.highBPCount || '0';
                 document.getElementById('successRate').textContent = stats.successRate;
 
-                // Update last report time
+                // Update last report time (events are in DESC order, so first is newest)
                 if (events.length > 0) {
-                    const lastEvent = events[events.length - 1];
+                    const lastEvent = events[0];
                     const date = new Date(lastEvent.timestamp);
                     document.getElementById('lastReport').textContent =
                         date.toLocaleString('ru-RU', {
@@ -372,7 +396,36 @@ router.get('/dashboard', (_req: Request, res: Response) => {
                     document.getElementById('lastReport').textContent = 'No reports yet';
                 }
 
-                // Update table
+                // Update daily averages table
+                const dailyAveragesBody = document.getElementById('dailyAveragesBody');
+                dailyAveragesBody.innerHTML = '';
+
+                dailyAverages.forEach(day => {
+                    const row = document.createElement('tr');
+                    const date = new Date(day.date);
+                    const dateStr = date.toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+
+                    const bpClass = day.avgBP > 160 ? 'badge-danger' :
+                                   day.avgBP > 140 ? 'badge-warning' : 'badge-success';
+
+                    row.innerHTML = \`
+                        <td>\${dateStr}</td>
+                        <td><span class="badge \${bpClass}">\${day.avgBP}</span></td>
+                        <td>\${day.count}</td>
+                    \`;
+
+                    dailyAveragesBody.appendChild(row);
+                });
+
+                // Show daily averages table, hide loading
+                document.getElementById('loadingDailyAverages').style.display = 'none';
+                document.getElementById('dailyAveragesTable').style.display = 'table';
+
+                // Update recent reports table
                 const tbody = document.getElementById('reportsBody');
                 tbody.innerHTML = '';
 
@@ -438,6 +491,8 @@ router.get('/dashboard', (_req: Request, res: Response) => {
         function refreshData() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('reportsTable').style.display = 'none';
+            document.getElementById('loadingDailyAverages').style.display = 'block';
+            document.getElementById('dailyAveragesTable').style.display = 'none';
             loadDashboardData();
         }
 
@@ -523,6 +578,21 @@ router.get('/api/download-csv', (_req: Request, res: Response) => {
     res.download(csvPath, 'blood-pressure-events.csv');
   } else {
     res.status(404).json({ error: 'CSV file not found' });
+  }
+});
+
+/**
+ * GET /api/daily-averages
+ * Get daily average BP statistics
+ */
+router.get('/api/daily-averages', async (_req: Request, res: Response) => {
+  try {
+    const { getDailyAverages } = require('../services/daily-report.service');
+    const dailyAverages = await getDailyAverages(30); // Last 30 days
+    res.json(dailyAverages);
+  } catch (error) {
+    logError('Failed to get daily averages for dashboard', error);
+    res.status(500).json({ error: 'Failed to load daily averages' });
   }
 });
 
