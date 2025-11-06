@@ -1,0 +1,276 @@
+{
+  "info": {
+    "name": "WhatsApp Blood Pressure Bot",
+    "description": "Complete API collection for WhatsApp Blood Pressure Bot with all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "whatsapp-bp-bot"
+  },
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/health",
+              "host": ["{{BASE_URL}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the server is running and get basic info"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Menu Operations",
+      "item": [
+        {
+          "name": "Send Menu to Senior (External)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{SEND_MENU_BEARER}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/send-menu",
+              "host": ["{{BASE_URL}}"],
+              "path": ["send-menu"]
+            },
+            "description": "Manually trigger sending blood pressure menu to senior (requires bearer token)"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Menu to Senior (Internal)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/send-menu-internal",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "send-menu-internal"]
+            },
+            "description": "Internal endpoint used by dashboard (no auth required)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "WhatsApp Webhook",
+      "item": [
+        {
+          "name": "Webhook Verification (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/webhook?hub.mode=subscribe&hub.verify_token={{VERIFY_TOKEN}}&hub.challenge=test_challenge_string",
+              "host": ["{{BASE_URL}}"],
+              "path": ["webhook"],
+              "query": [
+                {
+                  "key": "hub.mode",
+                  "value": "subscribe"
+                },
+                {
+                  "key": "hub.verify_token",
+                  "value": "{{VERIFY_TOKEN}}"
+                },
+                {
+                  "key": "hub.challenge",
+                  "value": "test_challenge_string"
+                }
+              ]
+            },
+            "description": "WhatsApp webhook verification endpoint (called by Meta)"
+          },
+          "response": []
+        },
+        {
+          "name": "Webhook Events (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"WHATSAPP_BUSINESS_ACCOUNT_ID\",\n      \"changes\": [\n        {\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"metadata\": {\n              \"display_phone_number\": \"PHONE_NUMBER\",\n              \"phone_number_id\": \"PHONE_NUMBER_ID\"\n            },\n            \"messages\": [\n              {\n                \"from\": \"{{SENIOR_NUMBER}}\",\n                \"id\": \"wamid.XXX\",\n                \"timestamp\": \"1234567890\",\n                \"type\": \"interactive\",\n                \"interactive\": {\n                  \"type\": \"button_reply\",\n                  \"button_reply\": {\n                    \"id\": \"bp_130\",\n                    \"title\": \"130\"\n                  }\n                }\n              }\n            ]\n          },\n          \"field\": \"messages\"\n        }\n      ]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/webhook",
+              "host": ["{{BASE_URL}}"],
+              "path": ["webhook"]
+            },
+            "description": "Receive WhatsApp events (button presses, messages)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Dashboard Web UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/dashboard",
+              "host": ["{{BASE_URL}}"],
+              "path": ["dashboard"]
+            },
+            "description": "View the web dashboard (HTML page)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/events",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "events"]
+            },
+            "description": "Get last 50 blood pressure events (JSON)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/statistics",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "statistics"]
+            },
+            "description": "Get overall statistics (total, average BP, success rate)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Daily Averages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/daily-averages",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "daily-averages"]
+            },
+            "description": "Get daily average BP for last 30 days"
+          },
+          "response": []
+        },
+        {
+          "name": "Download CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/download-csv",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "download-csv"]
+            },
+            "description": "Download all events as CSV file"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Operations",
+      "item": [
+        {
+          "name": "Preview Test Data (Nov 5th)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{SEND_MENU_BEARER}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/admin/preview-test-data",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "admin", "preview-test-data"]
+            },
+            "description": "Preview records from November 5th, 2025 before deleting (requires bearer auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Test Data (Nov 5th)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{SEND_MENU_BEARER}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/admin/delete-test-data",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "admin", "delete-test-data"]
+            },
+            "description": "Delete all records from November 5th, 2025 (requires bearer auth)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "SEND_MENU_BEARER",
+      "value": "a055cce65c4a5c849b7c76c1d5b5cedf2717942abf4591de1bc1cec6a7a2c31a",
+      "type": "string"
+    },
+    {
+      "key": "VERIFY_TOKEN",
+      "value": "my-webhook-verify-token-123",
+      "type": "string"
+    },
+    {
+      "key": "SENIOR_NUMBER",
+      "value": "37129953062",
+      "type": "string"
+    },
+    {
+      "key": "KID1",
+      "value": "37122373487",
+      "type": "string"
+    },
+    {
+      "key": "KID2",
+      "value": "37120038069",
+      "type": "string"
+    }
+  ]
+}
