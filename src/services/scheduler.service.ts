@@ -14,20 +14,20 @@ export function initializeScheduler(): void {
   }
 
   try {
-    // Production: Hourly schedule from 9 AM to 11 PM
-    const cronExpression = '0 9-23 * * *';
+    // Production: Every 2 hours from 9 AM to 11 PM
+    const cronExpression = '0 9-23/2 * * *';
 
-    logInfo('Initializing hourly menu scheduler', {
+    logInfo('Initializing 2-hourly menu scheduler', {
       timezone: config.scheduling.timezone,
       cronExpression,
-      frequency: 'Every hour from 9 AM to 11 PM',
+      frequency: 'Every 2 hours from 9 AM to 11 PM',
     });
 
-    // Schedule the hourly menu send
+    // Schedule the 2-hourly menu send
     const menuTask = cron.schedule(
       cronExpression,
       async () => {
-        logInfo('Scheduled hourly menu send triggered', {
+        logInfo('Scheduled 2-hourly menu send triggered', {
           time: new Date().toISOString(),
         });
 
@@ -52,8 +52,8 @@ export function initializeScheduler(): void {
     // Start the menu cron job
     menuTask.start();
 
-    logInfo('Hourly menu scheduler started successfully', {
-      schedule: 'Every hour from 9:00 to 23:00',
+    logInfo('2-hourly menu scheduler started successfully', {
+      schedule: 'Every 2 hours from 9:00 to 23:00 (9, 11, 13, 15, 17, 19, 21, 23)',
       timezone: config.scheduling.timezone,
     });
 
