@@ -548,19 +548,19 @@ router.get('/api/statistics', async (_req: Request, res: Response) => {
 
 /**
  * POST /api/send-menu-internal
- * Internal endpoint to send menu (no auth required from dashboard)
+ * Internal endpoint to send range selection buttons (no auth required from dashboard)
  */
 router.post('/api/send-menu-internal', async (_req: Request, res: Response) => {
   try {
-    logInfo('Manual menu send triggered from dashboard');
+    logInfo('Manual range selection buttons send triggered from dashboard');
 
-    const messageId = await whatsappClient.sendInteractiveMenu(config.phoneNumbers.senior);
+    const messageId = await whatsappClient.sendRangeSelectionButtons(config.phoneNumbers.senior);
 
-    logInfo('Menu sent successfully from dashboard', { messageId });
+    logInfo('Range selection buttons sent successfully from dashboard', { messageId });
     res.json({ success: true, messageId });
   } catch (error) {
-    logError('Failed to send menu from dashboard', error);
-    res.status(500).json({ error: 'Failed to send menu' });
+    logError('Failed to send range selection buttons from dashboard', error);
+    res.status(500).json({ error: 'Failed to send range selection buttons' });
   }
 });
 

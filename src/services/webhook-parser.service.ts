@@ -14,9 +14,17 @@ export interface ParsedSubscription {
   messageId: string;
 }
 
+export interface ParsedRangeSelection {
+  from: string;
+  range: 'low' | 'high';
+  timestamp: string;
+  messageId: string;
+}
+
 export type ParsedWebhookMessage =
   | { type: 'bp_selection'; data: ParsedButtonSelection }
   | { type: 'subscription'; data: ParsedSubscription }
+  | { type: 'range_selection'; data: ParsedRangeSelection }
   | null;
 
 /**
@@ -56,6 +64,19 @@ export function parseWebhookPayload(message: any): ParsedWebhookMessage {
   if (!buttonId) {
     logWarn('Interactive message without recognized reply type', { interactive });
     return null;
+  }
+
+  // Check if it's a range selection (low vs high)
+  if (buttonId === 'range_low' || buttonId === 'range_high') {
+    return {
+      type: 'range_selection',
+      data: {
+        from: message.from,
+        range: buttonId === 'range_low' ? 'low' : 'high',
+        timestamp: message.timestamp,
+        messageId: message.id,
+      },
+    };
   }
 
   // Check if it's a subscription response

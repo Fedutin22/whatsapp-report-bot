@@ -113,7 +113,7 @@ export async function getStatisticsFromDB(): Promise<{
       SELECT
         COUNT(*) as total_events,
         COUNT(*) FILTER (WHERE kid1_status = 'sent' AND kid2_status = 'sent') as successful,
-        COUNT(*) FILTER (WHERE bp_value = '>160') as high_bp_count
+        COUNT(*) FILTER (WHERE bp_value = '>145' OR bp_value = '>160') as high_bp_count
       FROM blood_pressure_events
       WHERE timestamp > NOW() - INTERVAL '30 days'
     `);
@@ -142,13 +142,24 @@ export async function getStatisticsFromDB(): Promise<{
     if (bpResult && bpResult.rows.length > 0) {
       bpResult.rows.forEach((row) => {
         const value = row.bp_value;
-        if (value === '<115' || value === '<110') {
+        // Handle low BP values
+        if (value === '<80') {
+          totalBP += 75;
+          countableEvents++;
+        } else if (value === '<115' || value === '<110') {
           totalBP += 110;
+          countableEvents++;
+        }
+        // Handle high BP values
+        else if (value === '>145') {
+          totalBP += 150;
           countableEvents++;
         } else if (value === '>160') {
           totalBP += 165;
           countableEvents++;
-        } else {
+        }
+        // Handle numeric values
+        else {
           const numValue = parseInt(value, 10);
           if (!isNaN(numValue)) {
             totalBP += numValue;

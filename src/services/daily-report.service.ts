@@ -13,8 +13,15 @@ export interface DailyAverages {
  * Calculate BP value from string
  */
 function calculateBPValue(value: string): number {
-  if (value === '<115') return 110;
-  if (value === '>160') return 165;
+  // Handle low blood pressure values
+  if (value === '<80') return 75;
+  if (value === '<115') return 110; // Keep for backward compatibility with old data
+
+  // Handle high blood pressure values
+  if (value === '>145') return 150;
+  if (value === '>160') return 165; // Keep for backward compatibility with old data
+
+  // Parse numeric values
   const numValue = parseInt(value, 10);
   return isNaN(numValue) ? 0 : numValue;
 }

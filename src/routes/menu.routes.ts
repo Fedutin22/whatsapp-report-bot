@@ -21,17 +21,17 @@ const sendMenuLimiter = rateLimit({
 
 /**
  * GET /send-menu
- * Sends the interactive blood pressure menu to the senior
+ * Sends the range selection buttons to the senior (Step 1 of 2-step BP reporting)
  * Requires Bearer token authentication and rate limiting
  */
 router.get('/send-menu', sendMenuLimiter, requireBearerAuth, async (req: Request, res: Response) => {
   try {
-    logInfo('Sending menu to senior', {
+    logInfo('Sending range selection buttons to senior', {
       seniorNumber: config.phoneNumbers.senior,
       triggeredBy: req.ip,
     });
 
-    const messageId = await whatsappClient.sendInteractiveMenu(config.phoneNumbers.senior);
+    const messageId = await whatsappClient.sendRangeSelectionButtons(config.phoneNumbers.senior);
 
     res.status(200).json({
       success: true,
@@ -40,11 +40,11 @@ router.get('/send-menu', sendMenuLimiter, requireBearerAuth, async (req: Request
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logError('Failed to send menu', error);
+    logError('Failed to send range selection buttons', error);
 
     res.status(500).json({
       success: false,
-      error: 'Failed to send menu',
+      error: 'Failed to send range selection buttons',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
   }

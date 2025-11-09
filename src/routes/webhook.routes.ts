@@ -68,7 +68,25 @@ router.post('/webhook', async (req: Request, res: Response) => {
             // Check if it's an interactive message (button/list selection)
             const parsed = parseWebhookPayload(message);
 
-            if (parsed?.type === 'bp_selection') {
+            if (parsed?.type === 'range_selection') {
+              logInfo('Parsed range selection', {
+                from: parsed.data.from,
+                range: parsed.data.range,
+              });
+
+              // Send appropriate list based on range selection
+              try {
+                if (parsed.data.range === 'low') {
+                  const messageId = await whatsappClient.sendLowRangeList(parsed.data.from);
+                  logInfo('Sent low range list', { messageId });
+                } else {
+                  const messageId = await whatsappClient.sendHighRangeList(parsed.data.from);
+                  logInfo('Sent high range list', { messageId });
+                }
+              } catch (error) {
+                logError('Failed to send BP range list', error);
+              }
+            } else if (parsed?.type === 'bp_selection') {
               logInfo('Parsed BP selection', {
                 from: parsed.data.from,
                 value: parsed.data.selectedValue,
@@ -92,19 +110,19 @@ router.post('/webhook', async (req: Request, res: Response) => {
                 logError('Failed to send subscription confirmation', error);
               }
             }
-            // If it's a text message from the senior, auto-reply with menu
+            // If it's a text message from the senior, auto-reply with range buttons
             else if (message.type === 'text' && message.from === config.phoneNumbers.senior) {
-              logInfo('Received text message from senior, sending menu', {
+              logInfo('Received text message from senior, sending range buttons', {
                 from: message.from,
                 text: message.text?.body,
               });
 
               try {
-                // Automatically send the interactive menu
-                const messageId = await whatsappClient.sendInteractiveMenu(message.from);
-                logInfo('Auto-sent menu to senior', { messageId });
+                // Automatically send the range selection buttons
+                const messageId = await whatsappClient.sendRangeSelectionButtons(message.from);
+                logInfo('Auto-sent range buttons to senior', { messageId });
               } catch (error) {
-                logError('Failed to auto-send menu', error);
+                logError('Failed to auto-send range buttons', error);
               }
             }
             // Other message types (images, audio, etc.) - just log

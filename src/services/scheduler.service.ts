@@ -32,16 +32,16 @@ export function initializeScheduler(): void {
         });
 
         try {
-          const messageId = await whatsappClient.sendInteractiveMenu(
+          const messageId = await whatsappClient.sendRangeSelectionButtons(
             config.phoneNumbers.senior
           );
 
-          logInfo('Scheduled menu sent successfully', {
+          logInfo('Scheduled range buttons sent successfully', {
             messageId,
             seniorNumber: config.phoneNumbers.senior,
           });
         } catch (error) {
-          logError('Failed to send scheduled menu', error);
+          logError('Failed to send scheduled range buttons', error);
         }
       },
       {
@@ -105,7 +105,7 @@ export async function triggerScheduledSend(): Promise<void> {
   logInfo('Manual trigger of scheduled send');
 
   try {
-    const messageId = await whatsappClient.sendInteractiveMenu(config.phoneNumbers.senior);
+    const messageId = await whatsappClient.sendRangeSelectionButtons(config.phoneNumbers.senior);
 
     logInfo('Manual scheduled send successful', {
       messageId,
